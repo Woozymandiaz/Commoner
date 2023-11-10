@@ -233,8 +233,7 @@ namespace Commoner
                 HitPoints = 4 + conModifier;
             }
 
-            if (race == Race.DwarfHill)
-                HitPoints += 1;
+            HitPoints = race == Race.DwarfHill ? (HitPoints + 1) : HitPoints;
         }
 
         public void ChangeStat(Stat stat, int num)
