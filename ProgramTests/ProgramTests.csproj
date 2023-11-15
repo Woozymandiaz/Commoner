@@ -4,15 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7C76F2AB-BA5A-421E-BE1E-74C8274392E0}</ProjectGuid>
+    <ProjectGuid>{67541587-1461-47E9-83F9-992CB74FFC75}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Commoner</RootNamespace>
-    <AssemblyName>Commoner</AssemblyName>
+    <RootNamespace>ProgramTests</RootNamespace>
+    <AssemblyName>ProgramTests</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -44,14 +43,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Commoner.cs" />
-    <Compile Include="Enum.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Dice.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Commoner\CommonerGenerator.csproj">
+      <Project>{7c76f2ab-ba5a-421e-be1e-74c8274392e0}</Project>
+      <Name>CommonerGenerator</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

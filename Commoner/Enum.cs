@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Commoner
+﻿namespace CommonerGenerator
 {
-    internal class Enum
+    public class Enum
     {
         public enum Race
         {
@@ -35,6 +29,13 @@ namespace Commoner
         {
             Small = 0,
             Medium = 1
+        }
+
+        public enum ScoreType
+        {
+            PointBuy = 0,
+            Roll3d6 = 1,
+            Roll4d6d1 = 2
         }
     }
 }

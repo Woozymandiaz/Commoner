@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using static Commoner.Enum;
+using System.Timers;
+using static CommonerGenerator.Enum;
 
-namespace Commoner
+namespace CommonerGenerator
 {
-    internal class Commoner
+    public class Commoner
     {
         public Race Race { get; set; }
 
@@ -31,6 +30,25 @@ namespace Commoner
         public Commoner()
         {
             Random rnd = new Random();
+
+            Race = (Race)rnd.Next(0, 8);
+
+            HitPoints = 4;
+
+            Strength = 10;
+            Dexterity = 10;
+            Constitution = 10;
+            Intelligence = 10;
+            Wisdom = 10;
+            Charisma = 10;
+
+            SetSize(Race);
+        }
+
+        public Commoner(ScoreType method)
+        {
+            Random rnd = new Random();
+
             Race = (Race)rnd.Next(0, 8);
 
             Strength = 10;
@@ -40,48 +58,120 @@ namespace Commoner
             Wisdom = 10;
             Charisma = 10;
 
-            SetStats();
+            RollStats(method);
             SetRaceStats(Race);
             SetSize(Race);
             SetHitPoints(Race, Size);
         }
 
-        public void CommonerStats()
+        public Commoner(int scoreMin, int scoreMax)
         {
-            string hitDie = "1d8";
+            Random rnd = new Random();
 
-            if (Size == Size.Small)
-                hitDie = "1d6";
+            Race = (Race)rnd.Next(0, 8);
 
-            int conMod = (Constitution - 10) / 2;
-            if (Constitution == 9)
-                conMod -= 1;
+            Strength = 10;
+            Dexterity = 10;
+            Constitution = 10;
+            Intelligence = 10;
+            Wisdom = 10;
+            Charisma = 10;
 
-            string hitPoints = "";
-
-            if (conMod == 0)
-                hitPoints = "Hit Points: " + HitPoints + " (" + hitDie + ")";
-            else if (conMod > 0)
-                hitPoints = "Hit Points: " + HitPoints + " (" + hitDie + " + " + conMod + ")";
-            else
-                hitPoints = "Hit Points: " + HitPoints + " (" + hitDie + " - " + (-1 * conMod) + ")";
-
-            StringBuilder sb = new StringBuilder();
-
-            sb.AppendLine("Race: " + Race.ToString());
-            sb.AppendLine("Size: " + Size.ToString());
-            sb.AppendLine(hitPoints);
-            sb.AppendLine("Strength: " + Strength);
-            sb.AppendLine("Dexterity: " + Dexterity);
-            sb.AppendLine("Constitution: " + Constitution);
-            sb.AppendLine("Intelligence: " + Intelligence);
-            sb.AppendLine("Wisdom: " + Wisdom);
-            sb.AppendLine("Charisma: " + Charisma);
-
-            Console.WriteLine(sb.ToString());
+            SetStats(scoreMin, scoreMax);
+            SetRaceStats(Race);
+            SetSize(Race);
+            SetHitPoints(Race, Size);
         }
 
-        public void SetStats()
+        public void RollStats(ScoreType method)
+        {
+            if(method == ScoreType.PointBuy)
+            {
+                Random rnd = new Random();
+
+                int pointsLeft = 27;
+
+                Strength = 8;
+                Dexterity = 8;
+                Constitution = 8;
+                Intelligence = 8;
+                Wisdom = 8;
+                Charisma = 8;
+
+                while (pointsLeft > 0)
+                {
+                    Stat stat = (Stat)rnd.Next(1, 7);
+                    bool canIncrease = true;
+
+                    switch (stat)
+                    {
+                        case Stat.Strength:
+                            canIncrease = (Strength < 13) || (pointsLeft > 1 && Strength >= 13);
+                            break;
+                        case Stat.Dexterity:
+                            canIncrease = (Dexterity < 13) || (pointsLeft > 1 && Dexterity >= 13);
+                            break;
+                        case Stat.Constitution:
+                            canIncrease = (Constitution < 13) || (pointsLeft > 1 && Constitution >= 13);
+                            break;
+                        case Stat.Intelligence:
+                            canIncrease = (Intelligence < 13) || (pointsLeft > 1 && Intelligence >= 13);
+                            break;
+                        case Stat.Wisdom:
+                            canIncrease = (Wisdom < 13) || (pointsLeft > 1 && Wisdom >= 13);
+                            break;
+                        case Stat.Charisma:
+                            canIncrease = (Charisma < 13) || (pointsLeft > 1 && Charisma >= 13);
+                            break;
+                    }
+
+                    pointsLeft = canIncrease ? (pointsLeft - ChangeStat(stat, 1, 8, 15)) : pointsLeft;
+                }
+            }
+
+            if(method == ScoreType.Roll3d6)
+            {
+                Dice dice = new Dice();
+
+                Strength = dice.Roll(6) + dice.Roll(6) + dice.Roll(6);
+                Dexterity = dice.Roll(6) + dice.Roll(6) + dice.Roll(6);
+                Constitution = dice.Roll(6) + dice.Roll(6) + dice.Roll(6);
+                Intelligence = dice.Roll(6) + dice.Roll(6) + dice.Roll(6);
+                Wisdom = dice.Roll(6) + dice.Roll(6) + dice.Roll(6);
+                Charisma = dice.Roll(6) + dice.Roll(6) + dice.Roll(6);
+            }
+
+            if (method == ScoreType.Roll4d6d1)
+            {
+                Dice dice = new Dice();
+
+                Strength = 0;
+                Dexterity = 0;
+                Constitution = 0;
+                Intelligence = 0;
+                Wisdom = 0;
+                Charisma = 0;
+
+                for (int i = 1; i <= 6; i++)
+                {
+                    List<int> rolls = new List<int>();
+
+                    rolls.Add(dice.Roll(6));
+                    rolls.Add(dice.Roll(6));
+                    rolls.Add(dice.Roll(6));
+                    rolls.Add(dice.Roll(6));
+
+                    rolls.Remove(rolls.Min());
+
+                    foreach (int roll in rolls)
+                    {
+                        ChangeStat((Stat)i, roll, 1, 20);
+                    }
+                }
+            }
+        }
+
+        public void SetStats(int scoreMin, int scoreMax)
         {
             Random rnd = new Random();
             int pointsLeft = 0;
@@ -90,7 +180,7 @@ namespace Commoner
             {
                 int points = rnd.Next(-2, 3);
 
-                ChangeStat((Stat)i, points);
+                ChangeStat((Stat)i, points, scoreMin, scoreMax);
 
                 pointsLeft -= points;
             }
@@ -99,7 +189,7 @@ namespace Commoner
             {
                 Stat stat = (Stat)rnd.Next(1, 7);
 
-                ChangeStat(stat, -1);
+                ChangeStat(stat, -1, scoreMin, scoreMax);
 
                 pointsLeft += 1;
             }
@@ -108,7 +198,7 @@ namespace Commoner
             {
                 Stat stat = (Stat)rnd.Next(0, 7);
 
-                ChangeStat(stat, 1);
+                ChangeStat(stat, 1, scoreMin, scoreMax);
 
                 pointsLeft -= 1;
             }
@@ -152,7 +242,9 @@ namespace Commoner
             {
                 int pointsLeft = 3;
 
-                Stat stat1 = (Stat)rnd.Next(0, 7);
+                Stat stat = (Stat)rnd.Next(0, 7);
+
+                Stat stat1 = (stat != Stat.None) ? (Stat)rnd.Next(0, 7) : stat;
                 Stat stat2 = Stat.None;
                 Stat stat3 = Stat.None;
 
@@ -170,9 +262,10 @@ namespace Commoner
                         stat3 = (Stat)rnd.Next(0, 7);
                 }
 
-                while (stat1 == stat2 && stat2 == stat3)
+                while (stat1 == stat2 || stat2 == stat3 || stat1 == stat3)
                 {
                     stat1 = (Stat)rnd.Next(1, 7);
+                    stat2 = (Stat)rnd.Next(1, 7);
                 }
 
                 while (pointsLeft > 0)
@@ -236,43 +329,41 @@ namespace Commoner
             HitPoints = race == Race.DwarfHill ? (HitPoints + 1) : HitPoints;
         }
 
-        public void ChangeStat(Stat stat, int num)
+        public int ChangeStat(Stat stat, int num, int scoreMin, int scoreMax)
         {
             int newStat = 10;
 
             switch (stat)
             {
                 case Stat.Strength:
-                    newStat = Strength += num;
-                    if (newStat >= 8 && newStat <= 13)
-                        Strength = newStat;
+                    newStat = Strength + num;
+                    Strength = (newStat >= scoreMin && newStat <= scoreMax) ? newStat : Strength;
                     break;
                 case Stat.Dexterity:
-                    newStat = Dexterity += num;
-                    if (newStat >= 8 && newStat <= 13)
-                        Dexterity = newStat;
+                    newStat = Dexterity + num;
+                    Dexterity = (newStat >= scoreMin && newStat <= scoreMax) ? newStat : Dexterity;
                     break;
                 case Stat.Constitution:
-                    newStat = Constitution += num;
-                    if (newStat >= 8 && newStat <= 13)
-                        Constitution = newStat;
+                    newStat = Constitution + num;
+                    Constitution = (newStat >= scoreMin && newStat <= scoreMax) ? newStat : Constitution;
                     break;
                 case Stat.Intelligence:
-                    newStat = Intelligence += num;
-                    if (newStat >= 8 && newStat <= 13)
-                        Intelligence = newStat;
+                    newStat = Intelligence + num;
+                    Intelligence = (newStat >= scoreMin && newStat <= scoreMax) ? newStat : Intelligence;
                     break;
                 case Stat.Wisdom:
-                    newStat = Wisdom = newStat;
-                    if (newStat >= 8 && newStat <= 13)
-                        Wisdom += num;
+                    newStat = Wisdom + num;
+                    Wisdom = (newStat >= scoreMin && newStat <= scoreMax) ? newStat : Wisdom;
                     break;
                 case Stat.Charisma:
-                    newStat = Charisma = newStat;
-                    if (newStat >= 8 && newStat <= 13)
-                        Charisma += num;
+                    newStat = Charisma + num;
+                    Charisma = (newStat >= scoreMin && newStat <= scoreMax) ? newStat : Charisma;
                     break;
             }
+
+            int previousStat = newStat - num;
+
+            return ((previousStat >= 13) ? 2 : 1);
         }
 
         public void IncreaseRaceStat(Stat stat, int num)
@@ -299,5 +390,41 @@ namespace Commoner
                     break;
             }
         }
+
+        public void CommonerStats()
+        {
+            string hitDie = "1d8";
+
+            if (Size == Size.Small)
+                hitDie = "1d6";
+
+            int conMod = (Constitution - 10) / 2;
+            if (Constitution == 9)
+                conMod -= 1;
+
+            string hitPoints = "";
+
+            if (conMod == 0)
+                hitPoints = "Hit Points: " + HitPoints + " (" + hitDie + ")";
+            else if (conMod > 0)
+                hitPoints = "Hit Points: " + HitPoints + " (" + hitDie + " + " + conMod + ")";
+            else
+                hitPoints = "Hit Points: " + HitPoints + " (" + hitDie + " - " + (-1 * conMod) + ")";
+
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine("Race: " + Race.ToString());
+            sb.AppendLine("Size: " + Size.ToString());
+            sb.AppendLine(hitPoints);
+            sb.AppendLine("Strength: " + Strength);
+            sb.AppendLine("Dexterity: " + Dexterity);
+            sb.AppendLine("Constitution: " + Constitution);
+            sb.AppendLine("Intelligence: " + Intelligence);
+            sb.AppendLine("Wisdom: " + Wisdom);
+            sb.AppendLine("Charisma: " + Charisma);
+
+            Console.WriteLine(sb.ToString());
+        }
     }
 }
+        

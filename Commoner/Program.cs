@@ -1,29 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Commoner
+namespace CommonerGenerator
 {
     internal class Program
     {
         static void Main(string[] args)
         {
-            Commoner commoner = null;
             bool executing = true;
-            string response = "y";
 
             while (executing)
             {
                 Console.Clear();
 
-                commoner = new Commoner();
+                Commoner commoner = new Commoner(Enum.ScoreType.PointBuy);
                 commoner.CommonerStats();
 
                 Console.Write("Roll again? (y/n): ");
 
-                response = Console.ReadLine();
+                string response = Console.ReadLine();
 
                 if (response == "n" || response == "N")
                     executing = false;
